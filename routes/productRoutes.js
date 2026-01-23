@@ -4,6 +4,7 @@ const router = express.Router();
 const protect = require("../middleware/authMiddleware");
 const upload = require("../middleware/uploadMiddleware");
 const optionalAuth = require("../middleware/optionalAuth");
+
 const {
   addProduct,
   getProductById,
@@ -17,8 +18,7 @@ const {
 // PUBLIC ROUTES
 // ================================
 
-// ✅ PUBLIC PRODUCTS (NO PROTECT)
-
+// ✅ PUBLIC PRODUCTS
 router.get("/public", optionalAuth, getPublicProducts);
 
 // 🔒 MY PRODUCTS
@@ -30,8 +30,29 @@ router.get("/:id", getProductById);
 // ================================
 // PROTECTED ROUTES
 // ================================
-router.post("/", protect, upload.single("image"), addProduct);
+
+// ✅ ADD PRODUCT (single + multiple images supported)
+router.post(
+  "/",
+  protect,
+  upload.fields([
+    { name: "image", maxCount: 1 },     // old frontend
+    { name: "images", maxCount: 5 },    // new frontend
+  ]),
+  addProduct
+);
+
+// ✅ UPDATE PRODUCT (single + multiple images supported)
+router.put(
+  "/:id",
+  protect,
+  upload.fields([
+    { name: "image", maxCount: 1 },
+    { name: "images", maxCount: 5 },
+  ]),
+  updateProduct
+);
+
 router.delete("/:id", protect, deleteProduct);
-router.put("/:id", protect, upload.single("image"), updateProduct);
 
 module.exports = router;
