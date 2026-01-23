@@ -1,3 +1,5 @@
+productController.js
+
 const Product = require("../models/Product");
 
 // ================================
@@ -7,23 +9,7 @@ const addProduct = async (req, res) => {
   try {
     const { title, price, category, condition } = req.body;
 
-    // ❗ Support both single & multiple images
-    let image = "";
-    let images = [];
-
-    if (req.file) {
-      // old frontend (single image)
-      image = req.file.path;
-      images = [req.file.path];
-    }
-
-    if (req.files && req.files.length > 0) {
-      // new frontend (multiple images)
-      images = req.files.map((file) => file.path);
-      image = images[0]; // fallback for old UI
-    }
-
-    if (!image) {
+    if (!req.file) {
       return res.status(400).json({ message: "Image is required" });
     }
 
@@ -32,8 +18,7 @@ const addProduct = async (req, res) => {
       price,
       category,
       condition,
-      image,   // ✅ backward compatibility
-      images,  // ✅ new feature
+      image: req.file.path, // uploads/filename.png
       seller: req.user._id,
     });
 
@@ -57,18 +42,19 @@ const getMyProducts = async (req, res) => {
 };
 
 // ================================
-// GET PUBLIC PRODUCTS
+// ✅ GET PUBLIC PRODUCTS (FIXED)
 // ================================
 const getPublicProducts = async (req, res) => {
   try {
     let filter = {};
 
+    // if logged in, exclude own products
     if (req.user) {
       filter = { seller: { $ne: req.user._id } };
     }
 
     const products = await Product.find(filter)
-      .populate("seller", "name email");
+      .populate("seller", "name email"); // ✅ FIX
 
     res.json(products);
   } catch {
@@ -81,7 +67,7 @@ const getPublicProducts = async (req, res) => {
 // ================================
 const getProductById = async (req, res) => {
   const product = await Product.findById(req.params.id)
-    .populate("seller", "name email");
+    .populate("seller", "name email"); // ✅ IMPORTANT
 
   res.json(product);
 };
@@ -121,15 +107,8 @@ const updateProduct = async (req, res) => {
   product.category = req.body.category || product.category;
   product.condition = req.body.condition || product.condition;
 
-  // ❗ Support both single & multiple images
   if (req.file) {
     product.image = req.file.path;
-    product.images = [req.file.path];
-  }
-
-  if (req.files && req.files.length > 0) {
-    product.images = req.files.map((file) => file.path);
-    product.image = product.images[0];
   }
 
   await product.save();
@@ -144,3 +123,5 @@ module.exports = {
   deleteProduct,
   updateProduct,
 };
+productController.js
+
