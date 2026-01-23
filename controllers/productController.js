@@ -123,5 +123,4 @@ module.exports = {
   deleteProduct,
   updateProduct,
 };
-productController.js
 

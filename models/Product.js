@@ -36,4 +36,3 @@ const productSchema = new mongoose.Schema(
 
 // ✅ IMPORTANT: Model name must be capitalized
 module.exports = mongoose.model("Product", productSchema);
-Product.js

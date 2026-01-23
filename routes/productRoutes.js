@@ -35,4 +35,3 @@ router.delete("/:id", protect, deleteProduct);
 router.put("/:id", protect, upload.single("image"), updateProduct);
 
 module.exports = router;
-productRoutes.js
